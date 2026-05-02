@@ -3,20 +3,38 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: AI1Net API specification
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: users
+    description: User profile operations
+  - name: ai-tools
+    description: AI tool catalog
+  - name: ai-providers
+    description: AI provider catalog
+  - name: ai-usage
+    description: AI usage tracking
+  - name: tokens
+    description: Token economy
+  - name: rewards
+    description: Rewards system
+  - name: stakes
+    description: Token staking
+  - name: governance
+    description: Governance proposals and votes
+  - name: dashboard
+    description: Dashboard summary and stats
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,7 +42,402 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /users/me:
+    get:
+      operationId: getMe
+      tags: [users]
+      summary: Get current user profile
+      security:
+        - clerkAuth: []
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+        "401":
+          description: Unauthorized
+    patch:
+      operationId: updateMe
+      tags: [users]
+      summary: Update current user profile
+      security:
+        - clerkAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserBody"
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+  /ai/providers:
+    get:
+      operationId: listAIProviders
+      tags: [ai-providers]
+      summary: List all AI providers
+      responses:
+        "200":
+          description: List of providers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AIProvider"
+
+  /ai/tools:
+    get:
+      operationId: listAITools
+      tags: [ai-tools]
+      summary: List AI tools with optional filtering
+      parameters:
+        - name: category
+          in: query
+          schema:
+            $ref: "#/components/schemas/AICategory"
+        - name: providerId
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of AI tools
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AITool"
+
+  /ai/tools/{slug}:
+    get:
+      operationId: getAITool
+      tags: [ai-tools]
+      summary: Get a specific AI tool by slug
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: AI tool details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AITool"
+        "404":
+          description: Not found
+
+  /ai/request:
+    post:
+      operationId: submitAIRequest
+      tags: [ai-usage]
+      summary: Submit a request to an AI tool
+      security:
+        - clerkAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AIRequestBody"
+      responses:
+        "200":
+          description: AI response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AIRequestResponse"
+        "401":
+          description: Unauthorized
+        "402":
+          description: Insufficient tokens
+
+  /usage:
+    get:
+      operationId: listMyUsage
+      tags: [ai-usage]
+      summary: List current user AI usage history
+      security:
+        - clerkAuth: []
+      parameters:
+        - name: toolId
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/UsageStatus"
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: Usage history
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedUsage"
+
+  /usage/stats:
+    get:
+      operationId: getUsageStats
+      tags: [ai-usage]
+      summary: Get aggregated usage statistics for current user
+      security:
+        - clerkAuth: []
+      responses:
+        "200":
+          description: Usage stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsageStats"
+
+  /tokens/balance:
+    get:
+      operationId: getTokenBalance
+      tags: [tokens]
+      summary: Get current user token balance
+      security:
+        - clerkAuth: []
+      responses:
+        "200":
+          description: Token balance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenBalance"
+
+  /tokens/transactions:
+    get:
+      operationId: listTokenTransactions
+      tags: [tokens]
+      summary: List token transaction history
+      security:
+        - clerkAuth: []
+      parameters:
+        - name: type
+          in: query
+          schema:
+            $ref: "#/components/schemas/TransactionType"
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          description: Transaction history
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PaginatedTransactions"
+
+  /rewards:
+    get:
+      operationId: listMyRewards
+      tags: [rewards]
+      summary: List current user rewards
+      security:
+        - clerkAuth: []
+      responses:
+        "200":
+          description: Rewards list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Reward"
+
+  /rewards/leaderboard:
+    get:
+      operationId: getRewardsLeaderboard
+      tags: [rewards]
+      summary: Get rewards leaderboard
+      responses:
+        "200":
+          description: Leaderboard
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LeaderboardEntry"
+
+  /stakes:
+    get:
+      operationId: listMyStakes
+      tags: [stakes]
+      summary: List current user stakes
+      security:
+        - clerkAuth: []
+      responses:
+        "200":
+          description: Stakes list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Stake"
+    post:
+      operationId: createStake
+      tags: [stakes]
+      summary: Stake tokens
+      security:
+        - clerkAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateStakeBody"
+      responses:
+        "201":
+          description: Stake created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Stake"
+
+  /governance/proposals:
+    get:
+      operationId: listProposals
+      tags: [governance]
+      summary: List governance proposals
+      parameters:
+        - name: status
+          in: query
+          schema:
+            $ref: "#/components/schemas/ProposalStatus"
+      responses:
+        "200":
+          description: Proposals list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Proposal"
+
+  /governance/proposals/{id}/vote:
+    post:
+      operationId: castVote
+      tags: [governance]
+      summary: Cast a vote on a proposal
+      security:
+        - clerkAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CastVoteBody"
+      responses:
+        "201":
+          description: Vote cast
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Vote"
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [dashboard]
+      summary: Get dashboard summary stats for current user
+      security:
+        - clerkAuth: []
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /dashboard/activity:
+    get:
+      operationId: getDashboardActivity
+      tags: [dashboard]
+      summary: Get recent activity feed for current user
+      security:
+        - clerkAuth: []
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Activity feed
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ActivityItem"
+
+  /dashboard/tools-usage:
+    get:
+      operationId: getToolsUsageSummary
+      tags: [dashboard]
+      summary: Get per-tool usage counts for current user
+      security:
+        - clerkAuth: []
+      responses:
+        "200":
+          description: Tools usage summary
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ToolUsageSummary"
+
 components:
+  securitySchemes:
+    clerkAuth:
+      type: http
+      scheme: bearer
+
   schemas:
     HealthStatus:
       type: object
@@ -34,3 +447,499 @@ components:
       required:
         - status
 
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+        clerkId:
+          type: string
+        email:
+          type: string
+        name:
+          type: string
+          nullable: true
+        avatar:
+          type: string
+          nullable: true
+        tokenBalance:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - clerkId
+        - email
+        - tokenBalance
+        - createdAt
+
+    UpdateUserBody:
+      type: object
+      properties:
+        name:
+          type: string
+        avatar:
+          type: string
+
+    AICategory:
+      type: string
+      enum: [TEXT, IMAGE, VIDEO, CODE, VOICE, MULTIMODAL]
+
+    AIProvider:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+          nullable: true
+        website:
+          type: string
+          nullable: true
+        toolCount:
+          type: integer
+      required:
+        - id
+        - name
+        - toolCount
+
+    AITool:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        slug:
+          type: string
+        description:
+          type: string
+        category:
+          $ref: "#/components/schemas/AICategory"
+        providerId:
+          type: string
+        providerName:
+          type: string
+        pricePerUse:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - slug
+        - description
+        - category
+        - providerId
+        - providerName
+        - pricePerUse
+        - createdAt
+
+    AIRequestBody:
+      type: object
+      properties:
+        toolSlug:
+          type: string
+        input:
+          type: string
+        model:
+          type: string
+          nullable: true
+      required:
+        - toolSlug
+        - input
+
+    AIRequestResponse:
+      type: object
+      properties:
+        usageId:
+          type: string
+        output:
+          type: string
+        tokensUsed:
+          type: number
+        remainingBalance:
+          type: number
+        status:
+          $ref: "#/components/schemas/UsageStatus"
+      required:
+        - usageId
+        - output
+        - tokensUsed
+        - remainingBalance
+        - status
+
+    UsageStatus:
+      type: string
+      enum: [SUCCESS, FAILED, PENDING]
+
+    AIUsage:
+      type: object
+      properties:
+        id:
+          type: string
+        toolId:
+          type: string
+        toolName:
+          type: string
+        toolSlug:
+          type: string
+        category:
+          $ref: "#/components/schemas/AICategory"
+        input:
+          type: string
+        output:
+          type: string
+          nullable: true
+        tokensUsed:
+          type: number
+        status:
+          $ref: "#/components/schemas/UsageStatus"
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - toolId
+        - toolName
+        - toolSlug
+        - category
+        - input
+        - tokensUsed
+        - status
+        - createdAt
+
+    PaginatedUsage:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/AIUsage"
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+      required:
+        - data
+        - total
+        - limit
+        - offset
+
+    UsageStats:
+      type: object
+      properties:
+        totalRequests:
+          type: integer
+        totalTokensSpent:
+          type: number
+        requestsToday:
+          type: integer
+        tokensSpentToday:
+          type: number
+        successRate:
+          type: number
+        topCategories:
+          type: array
+          items:
+            type: object
+            properties:
+              category:
+                $ref: "#/components/schemas/AICategory"
+              count:
+                type: integer
+            required:
+              - category
+              - count
+      required:
+        - totalRequests
+        - totalTokensSpent
+        - requestsToday
+        - tokensSpentToday
+        - successRate
+        - topCategories
+
+    TransactionType:
+      type: string
+      enum: [SPEND, EARN, STAKE, UNSTAKE, REWARD]
+
+    TokenBalance:
+      type: object
+      properties:
+        balance:
+          type: number
+        stakedAmount:
+          type: number
+        availableBalance:
+          type: number
+      required:
+        - balance
+        - stakedAmount
+        - availableBalance
+
+    TokenTransaction:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          $ref: "#/components/schemas/TransactionType"
+        amount:
+          type: number
+        metadata:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - type
+        - amount
+        - createdAt
+
+    PaginatedTransactions:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: "#/components/schemas/TokenTransaction"
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+      required:
+        - data
+        - total
+        - limit
+        - offset
+
+    RewardType:
+      type: string
+      enum: [USAGE, REFERRAL, CONTRIBUTION, BONUS]
+
+    Reward:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          $ref: "#/components/schemas/RewardType"
+        amount:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - type
+        - amount
+        - createdAt
+
+    LeaderboardEntry:
+      type: object
+      properties:
+        rank:
+          type: integer
+        userId:
+          type: string
+        name:
+          type: string
+        totalRewards:
+          type: number
+        requestCount:
+          type: integer
+      required:
+        - rank
+        - userId
+        - name
+        - totalRewards
+        - requestCount
+
+    StakeStatus:
+      type: string
+      enum: [ACTIVE, COMPLETED, WITHDRAWN]
+
+    Stake:
+      type: object
+      properties:
+        id:
+          type: string
+        amount:
+          type: number
+        status:
+          $ref: "#/components/schemas/StakeStatus"
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+        - id
+        - amount
+        - status
+        - startDate
+
+    CreateStakeBody:
+      type: object
+      properties:
+        amount:
+          type: number
+      required:
+        - amount
+
+    ProposalStatus:
+      type: string
+      enum: [ACTIVE, PASSED, REJECTED]
+
+    VoteChoice:
+      type: string
+      enum: [YES, NO, ABSTAIN]
+
+    Proposal:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          $ref: "#/components/schemas/ProposalStatus"
+        endDate:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        yesVotes:
+          type: number
+        noVotes:
+          type: number
+        abstainVotes:
+          type: number
+        userVote:
+          $ref: "#/components/schemas/VoteChoice"
+          nullable: true
+      required:
+        - id
+        - title
+        - description
+        - status
+        - endDate
+        - createdAt
+        - yesVotes
+        - noVotes
+        - abstainVotes
+
+    CastVoteBody:
+      type: object
+      properties:
+        choice:
+          $ref: "#/components/schemas/VoteChoice"
+      required:
+        - choice
+
+    Vote:
+      type: object
+      properties:
+        id:
+          type: string
+        proposalId:
+          type: string
+        choice:
+          $ref: "#/components/schemas/VoteChoice"
+        weight:
+          type: number
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - proposalId
+        - choice
+        - weight
+        - createdAt
+
+    DashboardSummary:
+      type: object
+      properties:
+        requestsToday:
+          type: integer
+        tokenBalance:
+          type: number
+        totalRewardsEarned:
+          type: number
+        activeModels:
+          type: integer
+        totalRequests:
+          type: integer
+        tokensSpentToday:
+          type: number
+      required:
+        - requestsToday
+        - tokenBalance
+        - totalRewardsEarned
+        - activeModels
+        - totalRequests
+        - tokensSpentToday
+
+    ActivityItem:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [AI_REQUEST, REWARD_EARNED, TOKEN_TRANSACTION, STAKE]
+        title:
+          type: string
+        description:
+          type: string
+        amount:
+          type: number
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - type
+        - title
+        - description
+        - createdAt
+
+    ToolUsageSummary:
+      type: object
+      properties:
+        toolId:
+          type: string
+        toolName:
+          type: string
+        toolSlug:
+          type: string
+        category:
+          $ref: "#/components/schemas/AICategory"
+        requestCount:
+          type: integer
+        tokensSpent:
+          type: number
+      required:
+        - toolId
+        - toolName
+        - toolSlug
+        - category
+        - requestCount
+        - tokensSpent

@@ -1,0 +1,255 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // or "sqlite" for dev
+  url      = env("DATABASE_URL")
+}
+
+//////////////////////////////////////////////////////
+// 🔐 AUTH & USER
+//////////////////////////////////////////////////////
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  password      String
+  name          String?
+  avatar        String?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  accounts      Account[]
+  sessions      Session[]
+
+  usage         AIUsage[]
+  transactions  TokenTransaction[]
+  rewards       Reward[]
+  stakes        Stake[]
+  votes         Vote[]
+
+  tokenBalance  Float    @default(0)
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+//////////////////////////////////////////////////////
+// 🤖 AI ECOSYSTEM
+//////////////////////////////////////////////////////
+
+model AIProvider {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  website     String?
+
+  tools       AITool[]
+}
+
+model AITool {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String
+  category    AICategory
+
+  providerId  String
+  provider    AIProvider @relation(fields: [providerId], references: [id])
+
+  pricePerUse Float      // token cost
+
+  createdAt   DateTime @default(now())
+
+  usage       AIUsage[]
+}
+
+enum AICategory {
+  TEXT
+  IMAGE
+  VIDEO
+  CODE
+  VOICE
+  MULTIMODAL
+}
+
+//////////////////////////////////////////////////////
+// 📊 AI USAGE TRACKING
+//////////////////////////////////////////////////////
+
+model AIUsage {
+  id        String   @id @default(cuid())
+  userId    String
+  toolId    String
+
+  input     String
+  output    String?
+
+  tokensUsed Float
+  status     UsageStatus
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  tool AITool @relation(fields: [toolId], references: [id])
+}
+
+enum UsageStatus {
+  SUCCESS
+  FAILED
+  PENDING
+}
+
+//////////////////////////////////////////////////////
+// 🪙 TOKEN ECONOMY
+//////////////////////////////////////////////////////
+
+model TokenTransaction {
+  id        String   @id @default(cuid())
+  userId    String
+
+  type      TransactionType
+  amount    Float
+  metadata  String?
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+enum TransactionType {
+  SPEND
+  EARN
+  STAKE
+  UNSTAKE
+  REWARD
+}
+
+//////////////////////////////////////////////////////
+// 🎁 REWARDS SYSTEM
+//////////////////////////////////////////////////////
+
+model Reward {
+  id        String   @id @default(cuid())
+  userId    String
+
+  type      RewardType
+  amount    Float
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+enum RewardType {
+  USAGE
+  REFERRAL
+  CONTRIBUTION
+  BONUS
+}
+
+//////////////////////////////////////////////////////
+// 🔒 STAKING SYSTEM
+//////////////////////////////////////////////////////
+
+model Stake {
+  id        String   @id @default(cuid())
+  userId    String
+
+  amount    Float
+  status    StakeStatus
+
+  startDate DateTime @default(now())
+  endDate   DateTime?
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+enum StakeStatus {
+  ACTIVE
+  COMPLETED
+  WITHDRAWN
+}
+
+//////////////////////////////////////////////////////
+// 🗳️ GOVERNANCE
+//////////////////////////////////////////////////////
+
+model Proposal {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+
+  status      ProposalStatus
+
+  createdAt   DateTime @default(now())
+  endDate     DateTime
+
+  votes       Vote[]
+}
+
+model Vote {
+  id         String   @id @default(cuid())
+  userId     String
+  proposalId String
+
+  choice     VoteChoice
+  weight     Float
+
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  proposal Proposal @relation(fields: [proposalId], references: [id])
+
+  @@unique([userId, proposalId])
+}
+
+enum ProposalStatus {
+  ACTIVE
+  PASSED
+  REJECTED
+}
+
+enum VoteChoice {
+  YES
+  NO
+  ABSTAIN
+}
+
+//////////////////////////////////////////////////////
+// 📜 ACTIVITY LOG
+//////////////////////////////////////////////////////
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  userId    String?
+
+  action    String
+  metadata  String?
+
+  createdAt DateTime @default(now())
+}

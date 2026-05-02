@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "AI1Net"
+version = "1.0.0"
+id = "artifacts/ai1net"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23717
+
+[services.development]
+run = "pnpm --filter @workspace/ai1net run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/ai1net", "run", "build" ]
+publicDir = "artifacts/ai1net/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23717"
+BASE_PATH = "/"

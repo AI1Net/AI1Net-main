@@ -1,0 +1,248 @@
+Build a full-stack web application called **AI1Net** — a dashboard-based platform (NOT a landing page).
+
+The app is a unified AI hub where users can access multiple AI models, manage usage, and interact with a token-based ecosystem ($AI1NET).
+
+---
+
+## 🧱 CORE REQUIREMENTS
+
+### Tech Stack
+
+* Next.js 14+ (App Router)
+* TypeScript
+* Tailwind CSS
+* ShadCN UI (modified to neo-brutalism)
+* Zustand (state management)
+* Prisma + PostgreSQL (or SQLite for dev)
+* NextAuth (authentication)
+* API routes for backend logic
+
+---
+
+## 🎨 DESIGN SYSTEM — NEO BRUTALISM
+
+Style must follow:
+
+* Thick borders (`border-3 border-black`)
+* Hard shadows (`shadow-[4px_4px_0px_black]`)
+* Flat colors (no gradients)
+* High contrast (black, white, yellow, blue, red)
+* Sharp edges (no rounded-lg everywhere, minimal rounding)
+* Bold typography (uppercase headings)
+
+UI Feel:
+
+* Retro + Web3 + Hacker aesthetic
+* Inspired by brutalist dashboards, not SaaS minimalism
+
+---
+
+## 🔐 AUTH SYSTEM
+
+### Pages:
+
+1. `/login`
+2. `/register`
+
+### Features:
+
+* Email + password auth
+* Wallet connect (must fully working ERC20)
+* Clean brutalist login card
+
+### UI:
+
+* Centered card
+* Big bold title: "ACCESS AI1NET"
+* Inputs with thick borders
+* CTA button: "ENTER NETWORK"
+
+---
+
+## 🧠 MAIN APP STRUCTURE (AFTER LOGIN)
+
+Redirect user to:
+
+👉 `/dashboard`
+
+---
+
+## 🧭 LAYOUT
+
+### Sidebar (LEFT)
+
+* Logo: AI1NET
+* Navigation:
+
+  * Dashboard
+  * Explore AI
+  * My Usage
+  * Rewards
+  * Token ($AI1NET)
+  * Settings
+
+### Topbar
+
+* Search AI tools
+* User profile
+* Token balance
+
+---
+
+## 🖥️ DASHBOARD PAGE
+
+### Sections:
+
+#### 1. Overview Cards
+
+* AI Requests Today
+* Token Balance
+* Rewards Earned
+* Active Models
+
+#### 2. Quick Actions
+
+* "Use AI"
+* "Explore Tools"
+* "Stake Tokens"
+
+#### 3. Activity Feed
+
+* Recent AI usage
+* Rewards earned
+* System logs
+
+---
+
+## 🔍 EXPLORE AI PAGE
+
+### Features:
+
+* Grid of AI tools
+* Categories:
+
+  * Text
+  * Image
+  * Video
+  * Code
+  * Voice
+
+Each tool card:
+
+* Name
+* Description
+* Provider
+* "Use" button
+
+---
+
+## 🤖 AI TOOL INTERFACE
+
+When clicking a tool:
+
+### Open `/ai/[tool]`
+
+Features:
+
+* Input box (chat or prompt)
+* Model selector
+* Output display
+* Token cost per request
+
+Simulate API if needed.
+
+---
+
+## 📊 MY USAGE PAGE
+
+* List of AI requests
+* Filters (date, tool, type)
+* Token spent
+* Charts (simple)
+
+---
+
+## 💰 REWARDS PAGE
+
+* Earned tokens
+* Activity rewards
+* Leaderboard (mock)
+
+---
+
+## 🪙 TOKEN PAGE ($AI1NET)
+
+### Sections:
+
+* Balance
+* Transaction history
+* Stake tokens (UI only)
+* Governance (vote UI mock)
+
+---
+
+## ⚙️ SETTINGS PAGE
+
+* Profile info
+* Theme toggle
+* API key (future)
+* Logout
+
+---
+
+## 🔄 STATE MANAGEMENT
+
+Use Zustand:
+
+Store:
+
+* user
+* token balance
+* AI usage
+* rewards
+
+---
+
+## 🔌 BACKEND LOGIC
+
+Basic API routes:
+
+* /api/auth
+* /api/ai/request
+* /api/token
+* /api/rewards
+
+Mock AI responses if needed.
+
+---
+
+## 🧩 COMPONENTS
+
+Build reusable:
+
+* BrutalCard
+* BrutalButton
+* Sidebar
+* StatCard
+* AI Tool Card
+
+---
+
+## ✨ EXTRA (IMPORTANT)
+
+* Smooth micro animations (hover scale, click bounce)
+* No glassmorphism
+* No gradients
+* Everything should feel bold, raw, and powerful
+
+---
+
+## 🚀 FINAL GOAL
+
+This app should feel like:
+👉 "The Bloomberg Terminal of AI"
+👉 A control panel for the AI economy
+
+NOT a marketing site — a real product UI.
+
+---
