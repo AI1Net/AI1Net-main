@@ -2,14 +2,15 @@
 -- PostgreSQL database dump
 --
 
-\restrict T3pjnpuhXGmhjGKKXFbQ89MZ8qFmz6826Buiqp4NhQRRgesWhs2CLoJVjT83QQd
+\restrict 0sUIEZ6fp8L1ff2Few0iGMklgaPJ4OcQRc7ZHkGz5eoB9gco3DCkzamQDy4gnrB
 
--- Dumped from database version 16.10
--- Dumped by pg_dump version 16.10
+-- Dumped from database version 18.3
+-- Dumped by pg_dump version 18.3
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -260,7 +261,8 @@ CREATE TABLE public.users (
     avatar text,
     token_balance real DEFAULT 500 NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
-    updated_at timestamp with time zone DEFAULT now() NOT NULL
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    wallet_address text
 );
 
 
@@ -295,11 +297,11 @@ COPY public.activity_logs (id, user_id, action, metadata, created_at) FROM stdin
 --
 
 COPY public.ai_providers (id, name, description, website, created_at) FROM stdin;
-prov-openai	OpenAI	Creator of GPT and DALL-E series models	https://openai.com	2026-05-02 04:30:44.633295+00
-prov-anthropic	Anthropic	AI safety company behind Claude models	https://anthropic.com	2026-05-02 04:30:44.633295+00
-prov-stability	Stability AI	Open-source image and video generation	https://stability.ai	2026-05-02 04:30:44.633295+00
-prov-google	Google DeepMind	Gemini and other frontier AI models	https://deepmind.google	2026-05-02 04:30:44.633295+00
-prov-runway	Runway ML	Professional AI video generation tools	https://runwayml.com	2026-05-02 04:30:44.633295+00
+prov-openai	OpenAI	Creator of GPT and DALL-E series models	https://openai.com	2026-05-02 11:30:44.633295+07
+prov-anthropic	Anthropic	AI safety company behind Claude models	https://anthropic.com	2026-05-02 11:30:44.633295+07
+prov-stability	Stability AI	Open-source image and video generation	https://stability.ai	2026-05-02 11:30:44.633295+07
+prov-google	Google DeepMind	Gemini and other frontier AI models	https://deepmind.google	2026-05-02 11:30:44.633295+07
+prov-runway	Runway ML	Professional AI video generation tools	https://runwayml.com	2026-05-02 11:30:44.633295+07
 \.
 
 
@@ -308,18 +310,18 @@ prov-runway	Runway ML	Professional AI video generation tools	https://runwayml.co
 --
 
 COPY public.ai_tools (id, name, slug, description, category, provider_id, price_per_use, created_at) FROM stdin;
-tool-gpt4o	GPT-4o	gpt-4o	OpenAI's most capable multimodal model for text, vision, and reasoning tasks	TEXT	prov-openai	2	2026-05-02 04:30:44.633295+00
-tool-o1	o1 Reasoning	o1-reasoning	Advanced chain-of-thought reasoning model for complex problems	TEXT	prov-openai	5	2026-05-02 04:30:44.633295+00
-tool-claude35	Claude 3.5 Sonnet	claude-35-sonnet	Anthropic's most intelligent model with exceptional coding capabilities	CODE	prov-anthropic	3	2026-05-02 04:30:44.633295+00
-tool-claude-opus	Claude 3 Opus	claude-3-opus	Maximum intelligence for highly complex tasks and research	TEXT	prov-anthropic	4	2026-05-02 04:30:44.633295+00
-tool-dalle3	DALL-E 3	dalle-3	High-quality text-to-image generation with precise prompt adherence	IMAGE	prov-openai	4	2026-05-02 04:30:44.633295+00
-tool-sdxl	Stable Diffusion XL	stable-diffusion-xl	Open-source photorealistic image generation	IMAGE	prov-stability	2	2026-05-02 04:30:44.633295+00
-tool-gemini-pro	Gemini 1.5 Pro	gemini-15-pro	Google's multimodal model with 1M token context window	MULTIMODAL	prov-google	3	2026-05-02 04:30:44.633295+00
-tool-codex	Codex Pro	codex-pro	Specialized code generation, review, and debugging assistant	CODE	prov-openai	2	2026-05-02 04:30:44.633295+00
-tool-gen3	Gen-3 Alpha	gen-3-alpha	Runway's latest high-fidelity video generation model	VIDEO	prov-runway	8	2026-05-02 04:30:44.633295+00
-tool-whisper	Whisper v3	whisper-v3	Industry-leading speech-to-text transcription with multilingual support	VOICE	prov-openai	1	2026-05-02 04:30:44.633295+00
-tool-tts	Text-to-Speech HD	tts-hd	Natural voice synthesis with 10+ voice options and emotional control	VOICE	prov-openai	2	2026-05-02 04:30:44.633295+00
-tool-svd	Stable Video	stable-video	Transform images into smooth, high-quality video clips	VIDEO	prov-stability	6	2026-05-02 04:30:44.633295+00
+tool-gpt4o	GPT-4o	gpt-4o	OpenAI's most capable multimodal model for text, vision, and reasoning tasks	TEXT	prov-openai	2	2026-05-02 11:30:44.633295+07
+tool-o1	o1 Reasoning	o1-reasoning	Advanced chain-of-thought reasoning model for complex problems	TEXT	prov-openai	5	2026-05-02 11:30:44.633295+07
+tool-claude35	Claude 3.5 Sonnet	claude-35-sonnet	Anthropic's most intelligent model with exceptional coding capabilities	CODE	prov-anthropic	3	2026-05-02 11:30:44.633295+07
+tool-claude-opus	Claude 3 Opus	claude-3-opus	Maximum intelligence for highly complex tasks and research	TEXT	prov-anthropic	4	2026-05-02 11:30:44.633295+07
+tool-dalle3	DALL-E 3	dalle-3	High-quality text-to-image generation with precise prompt adherence	IMAGE	prov-openai	4	2026-05-02 11:30:44.633295+07
+tool-sdxl	Stable Diffusion XL	stable-diffusion-xl	Open-source photorealistic image generation	IMAGE	prov-stability	2	2026-05-02 11:30:44.633295+07
+tool-gemini-pro	Gemini 1.5 Pro	gemini-15-pro	Google's multimodal model with 1M token context window	MULTIMODAL	prov-google	3	2026-05-02 11:30:44.633295+07
+tool-codex	Codex Pro	codex-pro	Specialized code generation, review, and debugging assistant	CODE	prov-openai	2	2026-05-02 11:30:44.633295+07
+tool-gen3	Gen-3 Alpha	gen-3-alpha	Runway's latest high-fidelity video generation model	VIDEO	prov-runway	8	2026-05-02 11:30:44.633295+07
+tool-whisper	Whisper v3	whisper-v3	Industry-leading speech-to-text transcription with multilingual support	VOICE	prov-openai	1	2026-05-02 11:30:44.633295+07
+tool-tts	Text-to-Speech HD	tts-hd	Natural voice synthesis with 10+ voice options and emotional control	VOICE	prov-openai	2	2026-05-02 11:30:44.633295+07
+tool-svd	Stable Video	stable-video	Transform images into smooth, high-quality video clips	VIDEO	prov-stability	6	2026-05-02 11:30:44.633295+07
 \.
 
 
@@ -328,8 +330,8 @@ tool-svd	Stable Video	stable-video	Transform images into smooth, high-quality vi
 --
 
 COPY public.ai_usage (id, user_id, tool_id, input, output, tokens_used, status, created_at) FROM stdin;
-4cec0f3b-7d58-43f1-ae87-7af3d904028d	b86c6fbf-1692-450b-987f-8e51dfec78ae	tool-claude35	KLIUU	```typescript\nfunction optimizeQuery(data: any[]) {\n  return data\n    .filter(item => item.active)\n    .sort((a, b) => b.score - a.score)\n    .slice(0, 10);\n}\n```	3	SUCCESS	2026-05-02 05:01:49.05943+00
-8d73fe31-e2b0-448c-8679-7c4fd5142c5f	b86c6fbf-1692-450b-987f-8e51dfec78ae	tool-claude35	HELLO\n	```typescript\nfunction optimizeQuery(data: any[]) {\n  return data\n    .filter(item => item.active)\n    .sort((a, b) => b.score - a.score)\n    .slice(0, 10);\n}\n```	3	SUCCESS	2026-05-02 05:01:55.908673+00
+4cec0f3b-7d58-43f1-ae87-7af3d904028d	b86c6fbf-1692-450b-987f-8e51dfec78ae	tool-claude35	KLIUU	```typescript\nfunction optimizeQuery(data: any[]) {\n  return data\n    .filter(item => item.active)\n    .sort((a, b) => b.score - a.score)\n    .slice(0, 10);\n}\n```	3	SUCCESS	2026-05-02 12:01:49.05943+07
+8d73fe31-e2b0-448c-8679-7c4fd5142c5f	b86c6fbf-1692-450b-987f-8e51dfec78ae	tool-claude35	HELLO\n	```typescript\nfunction optimizeQuery(data: any[]) {\n  return data\n    .filter(item => item.active)\n    .sort((a, b) => b.score - a.score)\n    .slice(0, 10);\n}\n```	3	SUCCESS	2026-05-02 12:01:55.908673+07
 \.
 
 
@@ -338,10 +340,10 @@ COPY public.ai_usage (id, user_id, tool_id, input, output, tokens_used, status, 
 --
 
 COPY public.proposals (id, title, description, status, end_date, created_at) FROM stdin;
-prop-001	AI1NET Fee Reduction Protocol v2	Proposal to reduce transaction fees by 15% across all AI tool categories to incentivize higher network utilization and onboard new users to the ecosystem.	ACTIVE	2026-05-16 04:30:44.633295+00	2026-04-30 04:30:44.633295+00
-prop-002	Community AI Model Integration Fund	Allocate 50,000 $AI1NET from the treasury to fund integration of 5 new open-source AI models into the platform, chosen by community vote.	ACTIVE	2026-05-09 04:30:44.633295+00	2026-05-01 04:30:44.633295+00
-prop-003	Staking Rewards Enhancement	Increase staking APY from 8% to 12% for tokens locked for 90+ days to encourage long-term network participation.	PASSED	2026-05-01 04:30:44.633295+00	2026-04-22 04:30:44.633295+00
-prop-004	Governance Participation Threshold	Lower minimum token stake required for governance voting from 100 to 10 $AI1NET to increase participation.	REJECTED	2026-04-27 04:30:44.633295+00	2026-04-12 04:30:44.633295+00
+prop-001	AI1NET Fee Reduction Protocol v2	Proposal to reduce transaction fees by 15% across all AI tool categories to incentivize higher network utilization and onboard new users to the ecosystem.	ACTIVE	2026-05-16 11:30:44.633295+07	2026-04-30 11:30:44.633295+07
+prop-002	Community AI Model Integration Fund	Allocate 50,000 $AI1NET from the treasury to fund integration of 5 new open-source AI models into the platform, chosen by community vote.	ACTIVE	2026-05-09 11:30:44.633295+07	2026-05-01 11:30:44.633295+07
+prop-003	Staking Rewards Enhancement	Increase staking APY from 8% to 12% for tokens locked for 90+ days to encourage long-term network participation.	PASSED	2026-05-01 11:30:44.633295+07	2026-04-22 11:30:44.633295+07
+prop-004	Governance Participation Threshold	Lower minimum token stake required for governance voting from 100 to 10 $AI1NET to increase participation.	REJECTED	2026-04-27 11:30:44.633295+07	2026-04-12 11:30:44.633295+07
 \.
 
 
@@ -350,8 +352,8 @@ prop-004	Governance Participation Threshold	Lower minimum token stake required f
 --
 
 COPY public.rewards (id, user_id, type, amount, created_at) FROM stdin;
-9ce6be9e-61aa-4714-85c2-118a01debd9f	b86c6fbf-1692-450b-987f-8e51dfec78ae	USAGE	0.3	2026-05-02 05:01:49.07303+00
-d208a9e8-1985-4d6d-8eb7-78950b0357f3	b86c6fbf-1692-450b-987f-8e51dfec78ae	USAGE	0.3	2026-05-02 05:01:55.921837+00
+9ce6be9e-61aa-4714-85c2-118a01debd9f	b86c6fbf-1692-450b-987f-8e51dfec78ae	USAGE	0.3	2026-05-02 12:01:49.07303+07
+d208a9e8-1985-4d6d-8eb7-78950b0357f3	b86c6fbf-1692-450b-987f-8e51dfec78ae	USAGE	0.3	2026-05-02 12:01:55.921837+07
 \.
 
 
@@ -368,10 +370,10 @@ COPY public.stakes (id, user_id, amount, status, start_date, end_date) FROM stdi
 --
 
 COPY public.token_transactions (id, user_id, type, amount, metadata, created_at) FROM stdin;
-aa73c070-1f08-4f8f-a648-ad9dd7beb34e	b86c6fbf-1692-450b-987f-8e51dfec78ae	SPEND	3	AI request to Claude 3.5 Sonnet	2026-05-02 05:01:49.069547+00
-c3b375b3-eed3-4414-b8c7-222e8861b359	b86c6fbf-1692-450b-987f-8e51dfec78ae	REWARD	0.3	Usage reward for Claude 3.5 Sonnet	2026-05-02 05:01:49.079699+00
-7b344aef-e6cf-4eec-9559-084d445889a4	b86c6fbf-1692-450b-987f-8e51dfec78ae	SPEND	3	AI request to Claude 3.5 Sonnet	2026-05-02 05:01:55.915905+00
-5491b338-73b0-4e7b-aff3-13b2fd5a94ad	b86c6fbf-1692-450b-987f-8e51dfec78ae	REWARD	0.3	Usage reward for Claude 3.5 Sonnet	2026-05-02 05:01:55.929925+00
+aa73c070-1f08-4f8f-a648-ad9dd7beb34e	b86c6fbf-1692-450b-987f-8e51dfec78ae	SPEND	3	AI request to Claude 3.5 Sonnet	2026-05-02 12:01:49.069547+07
+c3b375b3-eed3-4414-b8c7-222e8861b359	b86c6fbf-1692-450b-987f-8e51dfec78ae	REWARD	0.3	Usage reward for Claude 3.5 Sonnet	2026-05-02 12:01:49.079699+07
+7b344aef-e6cf-4eec-9559-084d445889a4	b86c6fbf-1692-450b-987f-8e51dfec78ae	SPEND	3	AI request to Claude 3.5 Sonnet	2026-05-02 12:01:55.915905+07
+5491b338-73b0-4e7b-aff3-13b2fd5a94ad	b86c6fbf-1692-450b-987f-8e51dfec78ae	REWARD	0.3	Usage reward for Claude 3.5 Sonnet	2026-05-02 12:01:55.929925+07
 \.
 
 
@@ -379,8 +381,11 @@ c3b375b3-eed3-4414-b8c7-222e8861b359	b86c6fbf-1692-450b-987f-8e51dfec78ae	REWARD
 -- Data for Name: users; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.users (id, clerk_id, email, name, avatar, token_balance, created_at, updated_at) FROM stdin;
-b86c6fbf-1692-450b-987f-8e51dfec78ae	user_3D9dBl1JkrMct67pT4SXgd5zEJN	user_3D9dBl1JkrMct67pT4SXgd5zEJN@ai1net.app	\N	\N	494.6	2026-05-02 05:01:30.323391+00	2026-05-02 05:01:55.924+00
+COPY public.users (id, clerk_id, email, name, avatar, token_balance, created_at, updated_at, wallet_address) FROM stdin;
+b86c6fbf-1692-450b-987f-8e51dfec78ae	user_3D9dBl1JkrMct67pT4SXgd5zEJN	user_3D9dBl1JkrMct67pT4SXgd5zEJN@ai1net.app	\N	\N	494.6	2026-05-02 12:01:30.323391+07	2026-05-02 12:01:55.924+07	\N
+a77f4779-b56c-4cb0-8860-dee40a51b305	user_3DCslVIESQflXKGdpWBgeyQ5fG2	user_3DCslVIESQflXKGdpWBgeyQ5fG2@ai1net.app		\N	500	2026-05-03 15:39:01.312828+07	2026-05-03 15:39:01.312828+07	\N
+444adee3-eae8-4c5f-a828-1f6bc876bcf2	user_3DBReC3QK3UP8zOdlGk1vbzmJNZ	user_3DBReC3QK3UP8zOdlGk1vbzmJNZ@ai1net.app		\N	500	2026-05-03 20:58:05.782786+07	2026-05-03 20:58:05.782786+07	\N
+1f5c95c9-962c-4011-806f-56be6b406250	user_3DDVnJ0D8igwFUDnA4i3SmjIcL0	user_3DDVnJ0D8igwFUDnA4i3SmjIcL0@ai1net.app		\N	500	2026-05-03 21:00:04.594087+07	2026-05-03 21:00:04.594087+07	\N
 \.
 
 
@@ -572,5 +577,5 @@ ALTER TABLE ONLY public.votes
 -- PostgreSQL database dump complete
 --
 
-\unrestrict T3pjnpuhXGmhjGKKXFbQ89MZ8qFmz6826Buiqp4NhQRRgesWhs2CLoJVjT83QQd
+\unrestrict 0sUIEZ6fp8L1ff2Few0iGMklgaPJ4OcQRc7ZHkGz5eoB9gco3DCkzamQDy4gnrB
 
