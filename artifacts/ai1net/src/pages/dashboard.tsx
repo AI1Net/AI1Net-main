@@ -1,10 +1,16 @@
 import { useGetDashboardSummary, useGetDashboardActivity, useGetToolsUsageSummary, getGetDashboardSummaryQueryKey, getGetDashboardActivityQueryKey, getGetToolsUsageSummaryQueryKey } from "@workspace/api-client-react";
 import { Activity, Zap, TrendingUp, Cpu, Server, History } from "lucide-react";
+import type { ActivityItem, ToolUsageSummary } from "@workspace/api-client-react";
+import WalletConnect from "@/components/WalletConnect";
 
 export default function Dashboard() {
   const { data: summary, isLoading: isSummaryLoading } = useGetDashboardSummary({ query: { queryKey: getGetDashboardSummaryQueryKey() } });
-  const { data: activity, isLoading: isActivityLoading } = useGetDashboardActivity({ limit: 10 }, { query: { queryKey: getGetDashboardActivityQueryKey({ limit: 10 }) } });
-  const { data: toolsUsage, isLoading: isToolsLoading } = useGetToolsUsageSummary({ query: { queryKey: getGetToolsUsageSummaryQueryKey() } });
+  const { data: activityRes, isLoading: isActivityLoading } = useGetDashboardActivity({ limit: 10 }, { query: { queryKey: getGetDashboardActivityQueryKey({ limit: 10 }) } });
+  const { data: toolsUsageRes, isLoading: isToolsLoading } = useGetToolsUsageSummary({ query: { queryKey: getGetToolsUsageSummaryQueryKey() } });
+  const activity: ActivityItem[] = Array.isArray(activityRes) ? activityRes : []
+  const toolsUsage: ToolUsageSummary[] = Array.isArray(toolsUsageRes) ? toolsUsageRes : []
+  console.log("activityRes:", activityRes)
+  console.log("toolsUsageRes:", toolsUsageRes)
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -13,6 +19,10 @@ export default function Dashboard() {
           <h1 className="text-4xl font-black uppercase tracking-tight">System Status</h1>
           <p className="font-mono text-muted-foreground mt-2">GLOBAL.OVERVIEW // LIVE_METRICS</p>
         </div>
+      </div>
+
+      <div className="flex items-center gap-4">
+        <WalletConnect />
       </div>
 
       {/* Stats Grid */}
@@ -34,9 +44,9 @@ export default function Dashboard() {
           <div className="brutalist-card p-0 bg-card overflow-hidden">
             {isActivityLoading ? (
               <div className="p-8 text-center font-mono animate-pulse">FETCHING LOGS...</div>
-            ) : activity?.length ? (
+            ) : activity.length > 0 ? (
               <div className="divide-y-[3px] divide-black dark:divide-white">
-                {activity.map((item) => (
+                {activity.map((item: ActivityItem) => (
                   <div key={item.id} className="p-4 hover:bg-muted/50 transition-colors flex items-start gap-4">
                     <div className="mt-1 px-2 py-1 bg-black text-white font-mono text-xs font-bold border-2 border-black dark:border-white">
                       {item.type}
@@ -70,7 +80,7 @@ export default function Dashboard() {
             {isToolsLoading ? (
               <div className="brutalist-card p-6 text-center font-mono animate-pulse">ANALYZING USAGE...</div>
             ) : toolsUsage?.length ? (
-              toolsUsage.map((tool, idx) => (
+              toolsUsage.map((tool: ToolUsageSummary, idx: number) => (
                 <div key={tool.toolId} className="brutalist-card p-4 relative group hover:-translate-y-1 transition-transform">
                   <div className="absolute -top-3 -right-3 w-8 h-8 bg-primary border-[3px] border-black dark:border-white text-black font-black flex items-center justify-center text-lg z-10 shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
                     {idx + 1}

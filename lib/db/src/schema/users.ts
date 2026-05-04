@@ -9,10 +9,10 @@ export const usersTable = pgTable("users", {
   name: text("name"),
   avatar: text("avatar"),
   tokenBalance: real("token_balance").notNull().default(500),
+
+  // ✅ ADD THIS
+  walletAddress: text("wallet_address"),
+
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
 });
-
-export const insertUserSchema = createInsertSchema(usersTable).omit({ id: true, createdAt: true, updatedAt: true });
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof usersTable.$inferSelect;

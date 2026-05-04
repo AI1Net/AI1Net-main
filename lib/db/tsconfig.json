@@ -1,6 +1,8 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
     "composite": true,
     "declarationMap": true,
     "emitDeclarationOnly": true,
@@ -8,5 +10,5 @@
     "rootDir": "src",
     "types": ["node"]
   },
-  "include": ["src"]
+  "include": ["src", "src/drizzle.config.ts"]
 }
