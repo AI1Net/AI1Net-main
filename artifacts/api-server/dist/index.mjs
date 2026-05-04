@@ -74549,7 +74549,17 @@ app.use(
   })
 );
 app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
-app.use((0, import_cors.default)({ credentials: true, origin: true }));
+app.use(
+  (0, import_cors.default)({
+    origin: [
+      "http://localhost:23717",
+      // dev
+      "https://your-vercel-app.vercel.app"
+      // 🔴 replace later
+    ],
+    credentials: true
+  })
+);
 app.use(import_express14.default.json());
 app.use(import_express14.default.urlencoded({ extended: true }));
 app.use(

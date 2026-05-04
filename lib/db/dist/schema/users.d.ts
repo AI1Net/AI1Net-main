@@ -1,4 +1,3 @@
-import { z } from "zod/v4";
 export declare const usersTable: import("drizzle-orm/pg-core").PgTableWithColumns<{
     name: "users";
     schema: undefined;
@@ -105,6 +104,23 @@ export declare const usersTable: import("drizzle-orm/pg-core").PgTableWithColumn
             identity: undefined;
             generated: undefined;
         }, {}, {}>;
+        walletAddress: import("drizzle-orm/pg-core").PgColumn<{
+            name: "wallet_address";
+            tableName: "users";
+            dataType: "string";
+            columnType: "PgText";
+            data: string;
+            driverParam: string;
+            notNull: false;
+            hasDefault: false;
+            isPrimaryKey: false;
+            isAutoincrement: false;
+            hasRuntimeDefault: false;
+            enumValues: [string, ...string[]];
+            baseColumn: never;
+            identity: undefined;
+            generated: undefined;
+        }, {}, {}>;
         createdAt: import("drizzle-orm/pg-core").PgColumn<{
             name: "created_at";
             tableName: "users";
@@ -142,16 +158,4 @@ export declare const usersTable: import("drizzle-orm/pg-core").PgTableWithColumn
     };
     dialect: "pg";
 }>;
-export declare const insertUserSchema: z.ZodObject<{
-    name: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-    clerkId: z.ZodString;
-    email: z.ZodString;
-    avatar: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-    tokenBalance: z.ZodOptional<z.ZodNumber>;
-}, {
-    out: {};
-    in: {};
-}>;
-export type InsertUser = z.infer<typeof insertUserSchema>;
-export type User = typeof usersTable.$inferSelect;
 //# sourceMappingURL=users.d.ts.map

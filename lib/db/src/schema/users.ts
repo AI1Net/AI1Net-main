@@ -12,6 +12,7 @@ export const usersTable = pgTable("users", {
 
   // ✅ ADD THIS
   walletAddress: text("wallet_address"),
+  
 
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow().$onUpdate(() => new Date()),
