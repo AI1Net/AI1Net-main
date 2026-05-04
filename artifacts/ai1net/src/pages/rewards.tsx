@@ -33,8 +33,14 @@ export default function Rewards() {
           <Trophy className="absolute -right-10 -bottom-10 w-64 h-64 opacity-20" />
           <div className="relative z-10">
             <h2 className="font-mono font-bold uppercase mb-2">TOTAL LIFETIME REWARDS</h2>
-            <div className="text-6xl md:text-8xl font-black tracking-tighter filter drop-shadow-[4px_4px_0px_rgba(0,0,0,1)]">
-              {totalRewards.toLocaleString()} <span className="text-4xl">A1N</span>
+            <div className="flex items-end gap-3 flex-wrap">
+              <div className="text-6xl md:text-8xl font-black tracking-tight filter drop-shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+                {totalRewards.toLocaleString()}
+              </div>
+
+              <span className="text-lg md:text-2xl font-mono font-bold bg-black text-primary px-3 py-1 border-2 border-black">
+                A1N
+              </span>
             </div>
             <p className="mt-4 font-bold uppercase flex items-center gap-2">
               <Star className="w-5 h-5" /> Keep using network models to earn more
