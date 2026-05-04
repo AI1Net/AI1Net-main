@@ -1,11 +1,17 @@
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
+
 import { WagmiProvider } from "wagmi";
-import { wagmiConfig  } from "@/lib/wagmi";
+import { wagmiConfig } from "@/lib/wagmi";
 
-<WagmiProvider config={wagmiConfig}>
-  <App />
-</WagmiProvider>
+import { setBaseUrl } from "@workspace/api-client-react";
 
-createRoot(document.getElementById("root")!).render(<App />);
+// 🔥 IMPORTANT: API BASE FIX
+setBaseUrl(import.meta.env.VITE_API_URL);
+
+createRoot(document.getElementById("root")!).render(
+  <WagmiProvider config={wagmiConfig}>
+    <App />
+  </WagmiProvider>
+);
