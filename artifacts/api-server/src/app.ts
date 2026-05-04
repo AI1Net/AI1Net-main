@@ -9,35 +9,30 @@ import {
   getClerkProxyHost,
 } from "./middlewares/clerkProxyMiddleware";
 import router from "./routes";
-import { logger } from "./lib/logger";
 import walletRouter from "./routes/wallet";
+import { logger } from "./lib/logger";
 
 const app: Express = express();
 
 /* =========================
-   1. TRUST PROXY (IMPORTANT FOR RAILWAY + CLERK)
+   1. CORS FIRST (CRITICAL)
 ========================= */
-app.set("trust proxy", 1);
+const allowedOrigins = [
+  "http://localhost:23717",
+  "http://localhost:5173",
+  "https://app.ai1net.xyz",
+];
 
-/* =========================
-   2. CORS (MUST BE FIRST)
-========================= */
 app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
 
-      const allowedOrigins = [
-        "http://localhost:23717",
-        "http://localhost:5173",
-        "https://app.ai1net.xyz",
-      ];
-
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
 
-      return callback(new Error("Blocked by CORS: " + origin));
+      return callback(null, true); // TEMP DEBUG (important)
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -48,22 +43,36 @@ app.use(
 app.options("*", cors());
 
 /* =========================
-   3. BODY PARSERS (ONLY ONCE)
+   2. BODY PARSER
 ========================= */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 /* =========================
-   4. LOGGER
+   3. LOGGER
 ========================= */
 app.use(
   pinoHttp({
     logger,
+    serializers: {
+      req(req) {
+        return {
+          id: req.id,
+          method: req.method,
+          url: req.url?.split("?")[0],
+        };
+      },
+      res(res) {
+        return {
+          statusCode: res.statusCode,
+        };
+      },
+    },
   })
 );
 
 /* =========================
-   5. CLERK PROXY
+   4. CLERK
 ========================= */
 app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
 
@@ -71,15 +80,15 @@ app.use(
   clerkMiddleware((req) => ({
     publishableKey: publishableKeyFromHost(
       getClerkProxyHost(req) ?? "",
-      process.env.CLERK_PUBLISHABLE_KEY
+      process.env.CLERK_PUBLISHABLE_KEY,
     ),
   }))
 );
 
 /* =========================
-   6. ROUTES
+   5. ROUTES
 ========================= */
-app.use("/api", router);
 app.use("/api/wallet", walletRouter);
+app.use("/api", router);
 
 export default app;

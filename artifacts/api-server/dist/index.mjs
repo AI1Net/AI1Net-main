@@ -47560,10 +47560,10 @@ var ExternalAccount = class _ExternalAccount {
   }
 };
 var Instance = class _Instance {
-  constructor(id, environmentType, allowedOrigins) {
+  constructor(id, environmentType, allowedOrigins2) {
     this.id = id;
     this.environmentType = environmentType;
-    this.allowedOrigins = allowedOrigins;
+    this.allowedOrigins = allowedOrigins2;
   }
   static fromJSON(data) {
     return new _Instance(data.id, data.environment_type, data.allowed_origins);
@@ -74264,24 +74264,38 @@ router9.get("/summary", requireAuth, async (req, res) => {
     const user = await getOrCreateUser(clerkUserId);
     const today = /* @__PURE__ */ new Date();
     today.setHours(0, 0, 0, 0);
-    const [requestsToday] = await db.select({ count: count() }).from(aiUsageTable).where(and(
-      eq(aiUsageTable.userId, user.id),
-      sql`${aiUsageTable.createdAt} >= ${today.toISOString()}`
-    ));
-    const [totalRequests] = await db.select({ count: count() }).from(aiUsageTable).where(eq(aiUsageTable.userId, user.id));
-    const [rewardsTotal] = await db.select({ total: sum(rewardsTable.amount) }).from(rewardsTable).where(eq(rewardsTable.userId, user.id));
-    const [tokensSpentToday] = await db.select({ total: sum(aiUsageTable.tokensUsed) }).from(aiUsageTable).where(and(
-      eq(aiUsageTable.userId, user.id),
-      sql`${aiUsageTable.createdAt} >= ${today.toISOString()}`
-    ));
-    const [activeModels] = await db.select({ count: count(sql`DISTINCT ${aiUsageTable.toolId}`) }).from(aiUsageTable).where(eq(aiUsageTable.userId, user.id));
+    const [
+      requestsToday,
+      totalRequests,
+      rewardsTotal,
+      tokensSpentToday,
+      activeModels
+    ] = await Promise.all([
+      db.select({ count: count() }).from(aiUsageTable).where(
+        and(
+          eq(aiUsageTable.userId, user.id),
+          sql`${aiUsageTable.createdAt} >= ${today.toISOString()}`
+        )
+      ),
+      db.select({ count: count() }).from(aiUsageTable).where(eq(aiUsageTable.userId, user.id)),
+      db.select({ total: sum(rewardsTable.amount) }).from(rewardsTable).where(eq(rewardsTable.userId, user.id)),
+      db.select({ total: sum(aiUsageTable.tokensUsed) }).from(aiUsageTable).where(
+        and(
+          eq(aiUsageTable.userId, user.id),
+          sql`${aiUsageTable.createdAt} >= ${today.toISOString()}`
+        )
+      ),
+      db.select({
+        count: count(sql`DISTINCT ${aiUsageTable.toolId}`)
+      }).from(aiUsageTable).where(eq(aiUsageTable.userId, user.id))
+    ]);
     res.json({
-      requestsToday: Number(requestsToday.count) || 0,
+      requestsToday: Number(requestsToday[0]?.count) || 0,
       tokenBalance: user.tokenBalance,
-      totalRewardsEarned: Number(rewardsTotal.total) || 0,
-      activeModels: Number(activeModels.count) || 0,
-      totalRequests: Number(totalRequests.count) || 0,
-      tokensSpentToday: Number(tokensSpentToday.total) || 0
+      totalRewardsEarned: Number(rewardsTotal[0]?.total) || 0,
+      activeModels: Number(activeModels[0]?.count) || 0,
+      totalRequests: Number(totalRequests[0]?.count) || 0,
+      tokensSpentToday: Number(tokensSpentToday[0]?.total) || 0
     });
   } catch (err) {
     req.log.error({ err }, "Failed to get dashboard summary");
@@ -74296,18 +74310,25 @@ router9.get("/activity", requireAuth, async (req, res) => {
       limit: req.query.limit ? Number(req.query.limit) : 10
     });
     const limit = params.limit ?? 10;
-    const usageItems = await db.select({
-      id: aiUsageTable.id,
-      toolName: aiToolsTable.name,
-      tokensUsed: aiUsageTable.tokensUsed,
-      status: aiUsageTable.status,
-      createdAt: aiUsageTable.createdAt
-    }).from(aiUsageTable).innerJoin(aiToolsTable, eq(aiToolsTable.id, aiUsageTable.toolId)).where(eq(aiUsageTable.userId, user.id)).orderBy(desc(aiUsageTable.createdAt)).limit(limit);
-    const rewardItems = await db.select().from(rewardsTable).where(eq(rewardsTable.userId, user.id)).orderBy(desc(rewardsTable.createdAt)).limit(limit);
-    const txItems = await db.select().from(tokenTransactionsTable).where(and(
-      eq(tokenTransactionsTable.userId, user.id),
-      eq(tokenTransactionsTable.type, "STAKE")
-    )).orderBy(desc(tokenTransactionsTable.createdAt)).limit(limit);
+    const [usageItems, rewardItems, txItems] = await Promise.all([
+      db.select({
+        id: aiUsageTable.id,
+        toolName: aiToolsTable.name,
+        tokensUsed: aiUsageTable.tokensUsed,
+        status: aiUsageTable.status,
+        createdAt: aiUsageTable.createdAt
+      }).from(aiUsageTable).innerJoin(
+        aiToolsTable,
+        eq(aiToolsTable.id, aiUsageTable.toolId)
+      ).where(eq(aiUsageTable.userId, user.id)).orderBy(desc(aiUsageTable.createdAt)).limit(limit),
+      db.select().from(rewardsTable).where(eq(rewardsTable.userId, user.id)).orderBy(desc(rewardsTable.createdAt)).limit(limit),
+      db.select().from(tokenTransactionsTable).where(
+        and(
+          eq(tokenTransactionsTable.userId, user.id),
+          eq(tokenTransactionsTable.type, "STAKE")
+        )
+      ).orderBy(desc(tokenTransactionsTable.createdAt)).limit(limit)
+    ]);
     const activity = [
       ...usageItems.map((u) => ({
         id: u.id,
@@ -74320,7 +74341,7 @@ router9.get("/activity", requireAuth, async (req, res) => {
       ...rewardItems.map((r) => ({
         id: r.id,
         type: "REWARD_EARNED",
-        title: `Reward earned`,
+        title: "Reward earned",
         description: `${r.type.toLowerCase()} reward received`,
         amount: r.amount,
         createdAt: r.createdAt
@@ -74328,12 +74349,14 @@ router9.get("/activity", requireAuth, async (req, res) => {
       ...txItems.map((t) => ({
         id: t.id,
         type: "STAKE",
-        title: `Tokens staked`,
+        title: "Tokens staked",
         description: t.metadata ?? "Stake transaction",
         amount: t.amount,
         createdAt: t.createdAt
       }))
-    ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, limit);
+    ].sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    ).slice(0, limit);
     res.json(activity);
   } catch (err) {
     req.log.error({ err }, "Failed to get dashboard activity");
@@ -74351,15 +74374,25 @@ router9.get("/tools-usage", requireAuth, async (req, res) => {
       category: aiToolsTable.category,
       requestCount: count(aiUsageTable.id),
       tokensSpent: sum(aiUsageTable.tokensUsed)
-    }).from(aiUsageTable).innerJoin(aiToolsTable, eq(aiToolsTable.id, aiUsageTable.toolId)).where(eq(aiUsageTable.userId, user.id)).groupBy(aiToolsTable.id, aiToolsTable.name, aiToolsTable.slug, aiToolsTable.category).orderBy(desc(count(aiUsageTable.id))).limit(10);
-    res.json(toolUsage.map((t) => ({
-      toolId: t.toolId,
-      toolName: t.toolName,
-      toolSlug: t.toolSlug,
-      category: t.category,
-      requestCount: Number(t.requestCount),
-      tokensSpent: Number(t.tokensSpent) || 0
-    })));
+    }).from(aiUsageTable).innerJoin(
+      aiToolsTable,
+      eq(aiToolsTable.id, aiUsageTable.toolId)
+    ).where(eq(aiUsageTable.userId, user.id)).groupBy(
+      aiToolsTable.id,
+      aiToolsTable.name,
+      aiToolsTable.slug,
+      aiToolsTable.category
+    ).orderBy(desc(count(aiUsageTable.id))).limit(10);
+    res.json(
+      toolUsage.map((t) => ({
+        toolId: t.toolId,
+        toolName: t.toolName,
+        toolSlug: t.toolSlug,
+        category: t.category,
+        requestCount: Number(t.requestCount),
+        tokensSpent: Number(t.tokensSpent) || 0
+      }))
+    );
   } catch (err) {
     req.log.error({ err }, "Failed to get tools usage");
     res.status(500).json({ error: "Internal server error" });
@@ -74379,24 +74412,6 @@ router10.use("/stakes", stakes_default);
 router10.use("/governance", governance_default);
 router10.use("/dashboard", dashboard_default);
 var routes_default = router10;
-
-// src/lib/logger.ts
-var import_pino = __toESM(require_pino(), 1);
-var isProduction = process.env.NODE_ENV === "production";
-var logger = (0, import_pino.default)({
-  level: process.env.LOG_LEVEL ?? "info",
-  redact: [
-    "req.headers.authorization",
-    "req.headers.cookie",
-    "res.headers['set-cookie']"
-  ],
-  ...isProduction ? {} : {
-    transport: {
-      target: "pino-pretty",
-      options: { colorize: true }
-    }
-  }
-});
 
 // src/routes/wallet.ts
 var import_express13 = __toESM(require_express2(), 1);
@@ -74524,11 +74539,48 @@ router11.post("/verify", async (req, res) => {
 });
 var wallet_default = router11;
 
+// src/lib/logger.ts
+var import_pino = __toESM(require_pino(), 1);
+var isProduction = process.env.NODE_ENV === "production";
+var logger = (0, import_pino.default)({
+  level: process.env.LOG_LEVEL ?? "info",
+  redact: [
+    "req.headers.authorization",
+    "req.headers.cookie",
+    "res.headers['set-cookie']"
+  ],
+  ...isProduction ? {} : {
+    transport: {
+      target: "pino-pretty",
+      options: { colorize: true }
+    }
+  }
+});
+
 // src/app.ts
 var app = (0, import_express14.default)();
+var allowedOrigins = [
+  "http://localhost:23717",
+  "http://localhost:5173",
+  "https://app.ai1net.xyz"
+];
+app.use(
+  (0, import_cors.default)({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(null, true);
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"]
+  })
+);
+app.options("*", (0, import_cors.default)());
 app.use(import_express14.default.json());
 app.use(import_express14.default.urlencoded({ extended: true }));
-app.use("/api/wallet", wallet_default);
 app.use(
   (0, import_pino_http.default)({
     logger,
@@ -74550,19 +74602,6 @@ app.use(
 );
 app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
 app.use(
-  (0, import_cors.default)({
-    origin: [
-      "http://localhost:23717",
-      // dev
-      "https://your-vercel-app.vercel.app"
-      // 🔴 replace later
-    ],
-    credentials: true
-  })
-);
-app.use(import_express14.default.json());
-app.use(import_express14.default.urlencoded({ extended: true }));
-app.use(
   clerkMiddleware((req) => ({
     publishableKey: publishableKeyFromHost(
       getClerkProxyHost(req) ?? "",
@@ -74570,6 +74609,7 @@ app.use(
     )
   }))
 );
+app.use("/api/wallet", wallet_default);
 app.use("/api", routes_default);
 var app_default = app;
 
