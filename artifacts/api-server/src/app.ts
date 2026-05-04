@@ -41,15 +41,33 @@ app.use(
 
 app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
 
+const allowedOrigins = [
+  "http://localhost:23717",
+  "http://localhost:5173",
+  "https://app.ai1net.xyz",
+];
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:23717", // dev
-      "https://your-vercel-app.vercel.app", // 🔴 replace later
-    ],
+    origin: (origin, callback) => {
+      // allow requests with no origin (mobile apps, curl, railway health checks)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error("Blocked by CORS: " + origin));
+    },
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// IMPORTANT: handle preflight globally
+app.options("*", cors());
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
