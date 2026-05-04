@@ -1,16 +1,11 @@
 import { Link, useLocation } from "wouter";
 import { useAuth, useUser } from "@clerk/react";
-import { 
-  LayoutDashboard, 
-  Search, 
-  History, 
-  Award, 
-  Coins, 
-  Settings,
-  LogOut,
-  Terminal,
-  Activity
+import { useState } from "react";
+import {
+  LayoutDashboard, Search, History, Award, Coins, Settings,
+  LogOut, Terminal, Activity, Menu
 } from "lucide-react";
+
 import { useGetTokenBalance } from "@workspace/api-client-react";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
@@ -18,92 +13,106 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const { signOut } = useAuth();
   const { user } = useUser();
   const { data: tokenBalance } = useGetTokenBalance();
+  const [open, setOpen] = useState(false);
 
   const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { href: "/explore", label: "Explore Models", icon: Search },
-    { href: "/usage", label: "Usage History", icon: History },
+    { href: "/explore", label: "Explore", icon: Search },
+    { href: "/usage", label: "Usage", icon: History },
     { href: "/rewards", label: "Rewards", icon: Award },
-    { href: "/token", label: "Token & Gov", icon: Coins },
+    { href: "/token", label: "Token", icon: Coins },
     { href: "/settings", label: "Settings", icon: Settings },
   ];
 
   return (
-    <div className="flex h-screen w-full bg-background overflow-hidden text-foreground">
-      {/* Sidebar */}
-      <aside className="w-64 flex flex-col border-r-[3px] border-black dark:border-white bg-card z-10 shrink-0">
-        <div className="h-16 flex items-center px-6 border-b-[3px] border-black dark:border-white bg-primary">
-          <Terminal className="w-6 h-6 mr-2 text-black" />
-          <span className="font-black text-xl tracking-widest text-black">AI1NET</span>
+    <div className="flex min-h-screen bg-background text-foreground">
+
+      {/* Mobile Sidebar */}
+      {open && (
+        <div className="fixed inset-0 z-40 bg-black/50 md:hidden" onClick={() => setOpen(false)} />
+      )}
+
+      <aside className={`fixed md:static z-50 top-0 left-0 h-full w-64 bg-card border-r-4 transform transition-transform 
+        ${open ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}>
+
+        <div className="h-16 flex items-center px-6 border-b-4 bg-primary">
+          <Terminal className="w-5 h-5 mr-2" />
+          <span className="font-black">AI1NET</span>
         </div>
-        
-        <nav className="flex-1 py-6 flex flex-col gap-2 px-4 overflow-y-auto">
-          <div className="text-xs font-mono font-bold text-muted-foreground mb-2 px-2">SYSTEM.NAV</div>
+
+        <nav className="p-4 space-y-2">
           {navItems.map((item) => {
-            const isActive = location === item.href || location.startsWith(`${item.href}/`);
+            const isActive = location.startsWith(item.href);
             return (
-              <Link 
-                key={item.href} 
-                href={item.href}
-                className={`flex items-center px-4 py-3 font-bold uppercase tracking-wider text-sm transition-colors border-[2px] ${
-                  isActive 
-                    ? "bg-primary text-black border-black dark:border-white shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] dark:shadow-[3px_3px_0px_0px_rgba(255,255,255,1)] translate-x-[-2px] translate-y-[-2px]" 
-                    : "border-transparent hover:border-black dark:hover:border-white hover:bg-accent/10"
-                }`}
+              <Link key={item.href} href={item.href}
+                className={`flex items-center px-3 py-2 border-2 text-sm font-bold uppercase
+                  ${isActive ? "bg-primary text-black" : "hover:bg-muted"}`}
               >
-                <item.icon className="w-5 h-5 mr-3 shrink-0" />
+                <item.icon className="w-4 h-4 mr-2" />
                 {item.label}
               </Link>
             );
           })}
         </nav>
 
-        <div className="p-4 border-t-[3px] border-black dark:border-white">
-          <button 
-            onClick={() => signOut()}
-            className="flex items-center w-full px-4 py-3 font-bold uppercase tracking-wider text-sm border-[2px] border-transparent hover:border-black dark:hover:border-white hover:bg-destructive hover:text-destructive-foreground transition-colors"
-          >
-            <LogOut className="w-5 h-5 mr-3" />
-            DISCONNECT
+        <div className="p-4 mt-auto">
+          <button onClick={() => signOut()} className="flex w-full items-center px-3 py-2 border-2 text-sm font-bold">
+            <LogOut className="w-4 h-4 mr-2" />
+            Logout
           </button>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-background bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]">
+      {/* Main */}
+      <main className="flex-1 flex flex-col min-w-0">
+
         {/* Topbar */}
-        <header className="h-16 flex items-center justify-between px-6 border-b-[3px] border-black dark:border-white bg-card shrink-0">
-          <div className="flex items-center">
-            <div className="flex items-center px-3 py-1 bg-black text-primary font-mono text-sm font-bold border-2 border-primary">
-              <Activity className="w-4 h-4 mr-2 animate-pulse" />
-              STATUS: ONLINE
+        <header className="h-14 md:h-16 flex items-center justify-between px-4 md:px-6 border-b-4 bg-card">
+
+          {/* Left */}
+          <div className="flex items-center gap-3">
+            <button
+              className="md:hidden"
+              onClick={() => setOpen(!open)}
+              aria-label="Toggle menu"
+            >
+              <Menu />
+            </button>
+
+            <div className="hidden sm:flex items-center px-2 py-1 bg-black text-primary text-xs font-mono">
+              <Activity className="w-3 h-3 mr-1 animate-pulse" />
+              ONLINE
             </div>
           </div>
-          
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2 px-4 py-1.5 border-[3px] border-black dark:border-white bg-white dark:bg-black font-mono font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] dark:shadow-[2px_2px_0px_0px_rgba(255,255,255,1)]">
-              <span className="text-muted-foreground">BALANCE:</span>
-              <span className="text-primary dark:text-primary filter drop-shadow-[1px_1px_0px_rgba(0,0,0,1)]">{tokenBalance?.balance?.toLocaleString() || 0} A1N</span>
+
+          {/* Right */}
+          <div className="flex items-center gap-3 md:gap-6">
+
+            <div className="px-2 md:px-4 py-1 border-2 text-xs md:text-sm font-mono">
+              {tokenBalance?.balance?.toLocaleString() || 0} A1N
             </div>
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <div className="text-sm font-bold uppercase">{user?.fullName || user?.primaryEmailAddress?.emailAddress?.split('@')[0]}</div>
-                <div className="text-xs font-mono text-muted-foreground">NODE_OP</div>
+
+            <div className="flex items-center gap-2">
+              <div className="hidden sm:block text-right text-xs md:text-sm font-bold">
+                {user?.fullName || "User"}
               </div>
-              <div className="w-10 h-10 border-[3px] border-black dark:border-white overflow-hidden bg-primary">
+
+              <div className="w-8 h-8 md:w-10 md:h-10 border-2 overflow-hidden">
                 {user?.imageUrl ? (
-                  <img src={user.imageUrl} alt="Avatar" className="w-full h-full object-cover grayscale contrast-125" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center font-bold">{user?.fullName?.[0] || '?'}</div>
-                )}
+                  <img
+                    src={user.imageUrl}
+                    alt={user.fullName || "User avatar"}
+                    className="w-full h-full object-cover"
+                  />
+                ) : "?"}
               </div>
             </div>
           </div>
         </header>
 
-        {/* Page Content */}
-        <div className="flex-1 overflow-auto p-6 md:p-8">
-          <div className="max-w-6xl mx-auto space-y-8">
+        {/* Content */}
+        <div className="flex-1 overflow-auto p-4 md:p-8">
+          <div className="max-w-6xl mx-auto">
             {children}
           </div>
         </div>
