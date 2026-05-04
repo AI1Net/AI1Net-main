@@ -89,4 +89,11 @@ app.use(
 app.use("/api/wallet", walletRouter);
 app.use("/api", router);
 
+// =========================
+// 6. 404 HANDLER (MUST BE LAST)
+// =========================
+app.use((req, res) => {
+  res.status(404).send("Not Found");
+});
+
 export default app;

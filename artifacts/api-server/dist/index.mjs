@@ -74578,7 +74578,6 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"]
   })
 );
-app.options("/*", (0, import_cors.default)());
 app.use(import_express14.default.json());
 app.use(import_express14.default.urlencoded({ extended: true }));
 app.use(
@@ -74611,6 +74610,9 @@ app.use(
 );
 app.use("/api/wallet", wallet_default);
 app.use("/api", routes_default);
+app.use((req, res) => {
+  res.status(404).send("Not Found");
+});
 var app_default = app;
 
 // src/index.ts
