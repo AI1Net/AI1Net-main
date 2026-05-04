@@ -41,7 +41,15 @@ app.use(
 
 app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
 
-app.use(cors({ credentials: true, origin: true }));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:23717", // dev
+      "https://your-vercel-app.vercel.app", // 🔴 replace later
+    ],
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
