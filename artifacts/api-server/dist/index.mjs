@@ -55197,7 +55197,7 @@ var GetToolsUsageSummaryResponse = arrayType(
 
 // src/routes/health.ts
 var router = (0, import_express.Router)();
-router.get("/healthz", (_req, res) => {
+router.get("/", (_req, res) => {
   const data = HealthCheckResponse.parse({ status: "ok" });
   res.json(data);
 });
@@ -74369,7 +74369,7 @@ var dashboard_default = router9;
 
 // src/routes/index.ts
 var router10 = (0, import_express12.Router)();
-router10.use(health_default);
+router10.use("/health", health_default);
 router10.use("/users", users_default);
 router10.use("/ai", ai_default);
 router10.use("/usage", usage_default);

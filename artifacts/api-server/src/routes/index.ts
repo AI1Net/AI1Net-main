@@ -11,7 +11,7 @@ import dashboardRouter from "./dashboard";
 
 const router: IRouter = Router();
 
-router.use(healthRouter);
+router.use("/health", healthRouter);
 router.use("/users", usersRouter);
 router.use("/ai", aiRouter);
 router.use("/usage", usageRouter);

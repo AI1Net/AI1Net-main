@@ -55,7 +55,7 @@ router.get("/summary", requireAuth, async (req, res) => {
   }
 });
 
-router.get("/activity", requireAuth, async (req, res) => {
+router.get("/activity", async (req, res) => {
   try {
     const clerkUserId = (req as any).clerkUserId as string;
     const user = await getOrCreateUser(clerkUserId);

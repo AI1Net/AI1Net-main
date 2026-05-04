@@ -10,14 +10,14 @@ import {
 } from "./middlewares/clerkProxyMiddleware";
 import router from "./routes";
 import { logger } from "./lib/logger";
-import walletRoutes from "./routes/wallet";
+import walletRouter from "./routes/wallet";
 
 const app: Express = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/api/wallet", walletRoutes);
+router.use("/wallet", walletRouter);
 
 app.use(
   pinoHttp({
