@@ -14,44 +14,24 @@ import walletRouter from "./routes/wallet";
 
 const app: Express = express();
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+/* =========================
+   1. TRUST PROXY (IMPORTANT FOR RAILWAY + CLERK)
+========================= */
+app.set("trust proxy", 1);
 
-router.use("/wallet", walletRouter);
-
-app.use(
-  pinoHttp({
-    logger,
-    serializers: {
-      req(req) {
-        return {
-          id: req.id,
-          method: req.method,
-          url: req.url?.split("?")[0],
-        };
-      },
-      res(res) {
-        return {
-          statusCode: res.statusCode,
-        };
-      },
-    },
-  }),
-);
-
-app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
-
-const allowedOrigins = [
-  "http://localhost:23717",
-  "http://localhost:5173",
-  "https://app.ai1net.xyz",
-];
-
+/* =========================
+   2. CORS (MUST BE FIRST)
+========================= */
 app.use(
   cors({
     origin: (origin, callback) => {
-      // allow requests with no origin (mobile apps, curl, railway health checks)
       if (!origin) return callback(null, true);
+
+      const allowedOrigins = [
+        "http://localhost:23717",
+        "http://localhost:5173",
+        "https://app.ai1net.xyz",
+      ];
 
       if (allowedOrigins.includes(origin)) {
         return callback(null, true);
@@ -65,21 +45,41 @@ app.use(
   })
 );
 
-// IMPORTANT: handle preflight globally
 app.options("*", cors());
 
+/* =========================
+   3. BODY PARSERS (ONLY ONCE)
+========================= */
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+/* =========================
+   4. LOGGER
+========================= */
+app.use(
+  pinoHttp({
+    logger,
+  })
+);
+
+/* =========================
+   5. CLERK PROXY
+========================= */
+app.use(CLERK_PROXY_PATH, clerkProxyMiddleware());
 
 app.use(
   clerkMiddleware((req) => ({
     publishableKey: publishableKeyFromHost(
       getClerkProxyHost(req) ?? "",
-      process.env.CLERK_PUBLISHABLE_KEY,
+      process.env.CLERK_PUBLISHABLE_KEY
     ),
-  })),
+  }))
 );
 
+/* =========================
+   6. ROUTES
+========================= */
 app.use("/api", router);
+app.use("/api/wallet", walletRouter);
 
 export default app;
