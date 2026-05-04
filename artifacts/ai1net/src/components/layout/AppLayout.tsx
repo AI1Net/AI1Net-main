@@ -21,7 +21,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: "/usage", label: "Usage", icon: History },
     { href: "/rewards", label: "Rewards", icon: Award },
     { href: "/token", label: "Token", icon: Coins },
-    { href: "/bug-report", label: "Bug Report", icon: Bug },
     { href: "/settings", label: "Settings", icon: Settings },
   ];
 
