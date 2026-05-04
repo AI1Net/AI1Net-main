@@ -27,26 +27,54 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen bg-background text-foreground">
 
-      {/* Mobile Sidebar */}
+      {/* Overlay (mobile only) */}
       {open && (
-        <div className="fixed inset-0 z-40 bg-black/50 md:hidden" onClick={() => setOpen(false)} />
+        <div
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          onClick={() => setOpen(false)}
+          aria-hidden="true"
+        />
       )}
 
-      <aside className={`fixed md:static z-50 top-0 left-0 h-full w-64 bg-card border-r-4 transform transition-transform 
-        ${open ? "translate-x-0" : "-translate-x-full md:translate-x-0"}`}>
+      {/* SIDEBAR */}
+      <aside
+        className={`
+          fixed md:static
+          top-0 left-0 z-50
+          h-full md:h-screen
+          w-64 min-w-64
+          bg-card border-r-4 border-black
 
-        <div className="h-16 flex items-center px-6 border-b-4 bg-primary">
+          transform transition-transform duration-200 ease-in-out
+          ${open ? "translate-x-0" : "-translate-x-full"}
+          md:translate-x-0
+
+          flex flex-col
+        `}
+      >
+        {/* Logo */}
+        <div className="h-16 flex items-center px-6 border-b-4 border-black bg-primary shrink-0">
           <Terminal className="w-5 h-5 mr-2" />
-          <span className="font-black">AI1NET</span>
+          <span className="font-black tracking-wide">AI1NET</span>
         </div>
 
-        <nav className="p-4 space-y-2">
+        {/* Navigation */}
+        <nav className="flex-1 p-4 space-y-2">
           {navItems.map((item) => {
             const isActive = location.startsWith(item.href);
+
             return (
-              <Link key={item.href} href={item.href}
-                className={`flex items-center px-3 py-2 border-2 text-sm font-bold uppercase
-                  ${isActive ? "bg-primary text-black" : "hover:bg-muted"}`}
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`
+                  flex items-center px-3 py-2 border-2 text-sm font-bold uppercase
+                  transition-all
+
+                  ${isActive
+                    ? "bg-primary text-black border-black"
+                    : "border-transparent hover:bg-muted"}
+                `}
               >
                 <item.icon className="w-4 h-4 mr-2" />
                 {item.label}
@@ -55,26 +83,33 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           })}
         </nav>
 
-        <div className="p-4 mt-auto">
-          <button onClick={() => signOut()} className="flex w-full items-center px-3 py-2 border-2 text-sm font-bold">
+        {/* Logout */}
+        <div className="p-4">
+          <button
+            onClick={() => signOut()}
+            aria-label="Logout"
+            title="Logout"
+            className="flex w-full items-center px-3 py-2 border-2 border-black text-sm font-bold hover:bg-muted"
+          >
             <LogOut className="w-4 h-4 mr-2" />
             Logout
           </button>
         </div>
       </aside>
 
-      {/* Main */}
+      {/* MAIN */}
       <main className="flex-1 flex flex-col min-w-0">
 
-        {/* Topbar */}
-        <header className="h-14 md:h-16 flex items-center justify-between px-4 md:px-6 border-b-4 bg-card">
+        {/* TOPBAR */}
+        <header className="h-14 md:h-16 flex items-center justify-between px-4 md:px-8 border-b-4 border-black bg-card">
 
           {/* Left */}
           <div className="flex items-center gap-3">
             <button
-              className="md:hidden"
               onClick={() => setOpen(!open)}
               aria-label="Toggle menu"
+              title="Toggle menu"
+              className="md:hidden"
             >
               <Menu />
             </button>
@@ -86,33 +121,36 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
 
           {/* Right */}
-          <div className="flex items-center gap-3 md:gap-6">
+          <div className="flex items-center gap-4">
 
-            <div className="px-2 md:px-4 py-1 border-2 text-xs md:text-sm font-mono">
+            <div className="px-3 py-1 border-2 border-black text-sm font-mono">
               {tokenBalance?.balance?.toLocaleString() || 0} A1N
             </div>
 
             <div className="flex items-center gap-2">
-              <div className="hidden sm:block text-right text-xs md:text-sm font-bold">
+              <div className="hidden sm:block text-sm font-bold">
                 {user?.fullName || "User"}
               </div>
 
-              <div className="w-8 h-8 md:w-10 md:h-10 border-2 overflow-hidden">
+              <div className="w-9 h-9 border-2 border-black overflow-hidden flex items-center justify-center">
                 {user?.imageUrl ? (
                   <img
                     src={user.imageUrl}
                     alt={user.fullName || "User avatar"}
+                    title={user.fullName || "User avatar"}
                     className="w-full h-full object-cover"
                   />
-                ) : "?"}
+                ) : (
+                  <span className="text-xs">?</span>
+                )}
               </div>
             </div>
           </div>
         </header>
 
-        {/* Content */}
-        <div className="flex-1 overflow-auto p-4 md:p-8">
-          <div className="max-w-6xl mx-auto">
+        {/* CONTENT */}
+        <div className="flex-1 overflow-auto p-4 md:p-10">
+          <div className="w-full">
             {children}
           </div>
         </div>
