@@ -18,6 +18,7 @@ export default function Settings() {
   const updateMutation = useUpdateMe();
 
   const [name, setName] = useState("");
+  const [activeTab, setActiveTab] = useState<"identity" | "interface" | "links">("identity");
 
   useEffect(() => {
     if (dbUser?.name) {
@@ -41,8 +42,16 @@ export default function Settings() {
     );
   };
 
+  const tabStyle = (tab: string) =>
+    `w-full text-left p-3 brutalist-border transition-colors ${
+      activeTab === tab
+        ? "bg-primary text-black"
+        : "bg-card text-muted-foreground hover:bg-muted"
+    }`;
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500 max-w-4xl mx-auto">
+      
       {/* HEADER */}
       <div className="flex items-end justify-between border-b-[4px] border-black dark:border-white pb-4">
         <div>
@@ -55,51 +64,50 @@ export default function Settings() {
         
         {/* SIDEBAR */}
         <div className="space-y-2 font-mono font-bold text-sm uppercase">
-          <button className="w-full text-left p-3 brutalist-border bg-primary text-black">
+          <button onClick={() => setActiveTab("identity")} className={tabStyle("identity")}>
             User Identity
           </button>
-          <button className="w-full text-left p-3 brutalist-border bg-card hover:bg-muted transition-colors text-muted-foreground">
+          <button onClick={() => setActiveTab("interface")} className={tabStyle("interface")}>
             Interface
           </button>
-          <button className="w-full text-left p-3 brutalist-border bg-card hover:bg-muted transition-colors text-muted-foreground">
+          <button onClick={() => setActiveTab("links")} className={tabStyle("links")}>
             Links
           </button>
         </div>
 
         {/* MAIN */}
-        <div className="md:col-span-2 space-y-8">
+        <div className="md:col-span-2 space-y-8 transition-all duration-300">
 
           {/* =========================
               IDENTITY
           ========================= */}
-          <section className="brutalist-card bg-card p-6 md:p-8 space-y-6">
-            <h2 className="text-2xl font-black uppercase flex items-center gap-2 border-b-[3px] border-black dark:border-white pb-2">
-              <User className="w-6 h-6" /> Identity Profile
-            </h2>
+          {activeTab === "identity" && (
+            <section className="brutalist-card bg-card p-6 md:p-8 space-y-6">
+              <h2 className="text-2xl font-black uppercase flex items-center gap-2 border-b-[3px] border-black dark:border-white pb-2">
+                <User className="w-6 h-6" /> Identity Profile
+              </h2>
 
-            {isLoading ? (
-              <div className="animate-pulse space-y-4">
-                <div className="h-10 bg-muted w-full"></div>
-                <div className="h-10 bg-muted w-full"></div>
-              </div>
-            ) : (
-              <form onSubmit={handleSaveProfile} className="space-y-4">
-                
-                <div className="space-y-2">
-                  <label className="font-bold uppercase text-sm block">NODE_ID (EMAIL)</label>
-                  <div className="w-full bg-muted border-2 border-black dark:border-white p-3 font-mono text-muted-foreground">
-                    {clerkUser?.primaryEmailAddress?.emailAddress ?? "UNKNOWN"}
-                  </div>
+              {isLoading ? (
+                <div className="animate-pulse space-y-4">
+                  <div className="h-10 bg-muted w-full"></div>
+                  <div className="h-10 bg-muted w-full"></div>
                 </div>
+              ) : (
+                <form onSubmit={handleSaveProfile} className="space-y-4">
+                  
+                  <div className="space-y-2">
+                    <label className="font-bold uppercase text-sm block">
+                      NODE_ID (EMAIL)
+                    </label>
+                    <div className="w-full bg-muted border-2 border-black dark:border-white p-3 font-mono text-muted-foreground">
+                      {clerkUser?.primaryEmailAddress?.emailAddress ?? "UNKNOWN"}
+                    </div>
+                  </div>
 
-                <div className="space-y-2">
-                  <label
-                    htmlFor="display_alias"
-                    className="font-bold uppercase text-sm block"
-                  >
-                    DISPLAY_ALIAS
-                  </label>
-
+                  <div className="space-y-2">
+                    <label htmlFor="display_alias" className="font-bold uppercase text-sm block">
+                      DISPLAY_ALIAS
+                    </label>
                     <input
                       id="display_alias"
                       type="text"
@@ -108,91 +116,88 @@ export default function Settings() {
                       placeholder="Enter your alias"
                       className="w-full bg-background border-[3px] border-black dark:border-white p-3 font-mono font-bold focus:outline-none focus:border-primary"
                     />
-                </div>
+                  </div>
 
-                <button
-                  type="submit"
-                  disabled={updateMutation.isPending || !name.trim()}
-                  className="brutalist-button bg-primary text-black px-6 py-3 flex items-center gap-2 disabled:opacity-50"
-                >
-                  <Save className="w-5 h-5" />
-                  {updateMutation.isPending ? "SAVING..." : "SAVE CONFIG"}
-                </button>
-              </form>
-            )}
-          </section>
+                  <button
+                    type="submit"
+                    disabled={updateMutation.isPending || !name.trim()}
+                    className="brutalist-button bg-primary text-black px-6 py-3 flex items-center gap-2 disabled:opacity-50"
+                  >
+                    <Save className="w-5 h-5" />
+                    {updateMutation.isPending ? "SAVING..." : "SAVE CONFIG"}
+                  </button>
+                </form>
+              )}
+            </section>
+          )}
 
           {/* =========================
               INTERFACE
           ========================= */}
-          <section className="brutalist-card bg-card p-6 md:p-8 space-y-6">
-            <h2 className="text-2xl font-black uppercase flex items-center gap-2 border-b-[3px] border-black dark:border-white pb-2">
-              <Sun className="w-6 h-6" /> Interface
-            </h2>
+          {activeTab === "interface" && (
+            <section className="brutalist-card bg-card p-6 md:p-8 space-y-6">
+              <h2 className="text-2xl font-black uppercase flex items-center gap-2 border-b-[3px] border-black dark:border-white pb-2">
+                <Sun className="w-6 h-6" /> Interface
+              </h2>
 
-            <div className="grid grid-cols-2 gap-4">
-              <button
-                onClick={() => setTheme("light")}
-                className={`brutalist-button py-4 flex flex-col items-center gap-2 ${
-                  theme === "light" ? "bg-primary text-black" : ""
-                }`}
-              >
-                <Sun className="w-6 h-6" />
-                LIGHT_MODE
-              </button>
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  onClick={() => setTheme("light")}
+                  className={`brutalist-button py-4 flex flex-col items-center gap-2 ${
+                    theme === "light" ? "bg-primary text-black" : ""
+                  }`}
+                >
+                  <Sun className="w-6 h-6" />
+                  LIGHT_MODE
+                </button>
 
-              <button
-                onClick={() => setTheme("dark")}
-                className={`brutalist-button py-4 flex flex-col items-center gap-2 ${
-                  theme === "dark" ? "bg-primary text-black" : "bg-black text-white"
-                }`}
-              >
-                <Moon className="w-6 h-6" />
-                DARK_MODE
-              </button>
-            </div>
-          </section>
+                <button
+                  onClick={() => setTheme("dark")}
+                  className={`brutalist-button py-4 flex flex-col items-center gap-2 ${
+                    theme === "dark" ? "bg-primary text-black" : "bg-black text-white"
+                  }`}
+                >
+                  <Moon className="w-6 h-6" />
+                  DARK_MODE
+                </button>
+              </div>
+            </section>
+          )}
 
           {/* =========================
-              LINKS (NEW SECTION)
+              LINKS
           ========================= */}
-          <section className="brutalist-card bg-card p-6 md:p-8 space-y-6">
-            <h2 className="text-2xl font-black uppercase flex items-center gap-2 border-b-[3px] border-black dark:border-white pb-2">
-              <ExternalLink className="w-6 h-6" /> Network Links
-            </h2>
+          {activeTab === "links" && (
+            <section className="brutalist-card bg-card p-6 md:p-8 space-y-6">
+              <h2 className="text-2xl font-black uppercase flex items-center gap-2 border-b-[3px] border-black dark:border-white pb-2">
+                <ExternalLink className="w-6 h-6" /> Network Links
+              </h2>
 
-            <div className="grid grid-cols-1 gap-3 font-mono text-sm">
-              
-              <a href="https://ai1net.xyz" target="_blank" rel="noopener noreferrer" className="brutalist-button p-3 flex justify-between">
-                WEBSITE
-                <span>↗</span>
-              </a>
-
-              <a href="https://x.com/AI1Net" target="_blank" rel="noopener noreferrer" className="brutalist-button p-3 flex justify-between">
-                X (TWITTER)
-                <span>↗</span>
-              </a>
-
-              <a href="https://t.me/Ai1_Net" target="_blank" rel="noopener noreferrer" className="brutalist-button p-3 flex justify-between">
-                TELEGRAM
-                <span>↗</span>
-              </a>
-
-              <a href="https://docs.ai1net.xyz" target="_blank" rel="noopener noreferrer" className="brutalist-button p-3 flex justify-between">
-                DOCUMENTATION
-                <span>↗</span>
-              </a>
-
-              <a href="https://github.com/AI1Net" target="_blank" rel="noopener noreferrer" className="brutalist-button p-3 flex justify-between">
-                GITHUB
-                <span>↗</span>
-              </a>
-
-            </div>
-          </section>
+              <div className="grid grid-cols-1 gap-3 font-mono text-sm">
+                {[
+                  ["WEBSITE", "https://ai1net.xyz"],
+                  ["X (TWITTER)", "https://x.com/AI1Net"],
+                  ["TELEGRAM", "https://t.me/Ai1_Net"],
+                  ["DOCUMENTATION", "https://docs.ai1net.xyz"],
+                  ["GITHUB", "https://github.com/AI1Net"],
+                ].map(([label, url]) => (
+                  <a
+                    key={label}
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="brutalist-button p-3 flex justify-between"
+                  >
+                    {label}
+                    <span>↗</span>
+                  </a>
+                ))}
+              </div>
+            </section>
+          )}
 
           {/* =========================
-              LOGOUT
+              LOGOUT (ALWAYS VISIBLE)
           ========================= */}
           <section className="brutalist-card bg-destructive/10 border-destructive p-6 md:p-8 space-y-4">
             <h2 className="text-xl font-black uppercase text-destructive flex items-center gap-2">

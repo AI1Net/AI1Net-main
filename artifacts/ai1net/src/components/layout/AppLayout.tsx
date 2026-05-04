@@ -3,7 +3,7 @@ import { useAuth, useUser } from "@clerk/react";
 import { useState } from "react";
 import {
   LayoutDashboard, Search, History, Award, Coins, Settings,
-  LogOut, Terminal, Activity, Menu
+  LogOut, Terminal, Activity, Menu, Bug
 } from "lucide-react";
 
 import { useGetTokenBalance } from "@workspace/api-client-react";
@@ -21,34 +21,43 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     { href: "/usage", label: "Usage", icon: History },
     { href: "/rewards", label: "Rewards", icon: Award },
     { href: "/token", label: "Token", icon: Coins },
+    { href: "/bug-report", label: "Bug Report", icon: Bug },
     { href: "/settings", label: "Settings", icon: Settings },
   ];
 
   return (
     <div className="flex min-h-screen bg-background text-foreground">
 
-      {/* Overlay (mobile only) */}
+      {/* Skip link */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only fixed top-2 left-2 bg-white text-black p-2 z-50"
+      >
+        Skip to content
+      </a>
+
+      {/* Overlay (mobile) */}
       {open && (
-        <div
-          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+        <button
           onClick={() => setOpen(false)}
-          aria-hidden="true"
+          aria-label="Close menu"
+          className="fixed inset-0 z-40 bg-black/50 md:hidden"
         />
       )}
 
       {/* SIDEBAR */}
       <aside
+        id="sidebar"
+        aria-label="Main navigation"
         className={`
           fixed md:static
           top-0 left-0 z-50
           h-full md:h-screen
           w-64 min-w-64
           bg-card border-r-4 border-black
-
           transform transition-transform duration-200 ease-in-out
           ${open ? "translate-x-0" : "-translate-x-full"}
           md:translate-x-0
-
           flex flex-col
         `}
       >
@@ -59,7 +68,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-2">
+        <nav aria-label="Sidebar navigation" className="flex-1 p-4 space-y-2">
           {navItems.map((item) => {
             const isActive = location.startsWith(item.href);
 
@@ -67,9 +76,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <Link
                 key={item.href}
                 href={item.href}
+                aria-current={isActive ? "page" : undefined}
                 className={`
                   flex items-center px-3 py-2 border-2 text-sm font-bold uppercase
-                  transition-all
+                  transition-all focus:outline-none focus:ring-2 focus:ring-primary
 
                   ${isActive
                     ? "bg-primary text-black border-black"
@@ -86,10 +96,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         {/* Logout */}
         <div className="p-4">
           <button
+            type="button"
             onClick={() => signOut()}
             aria-label="Logout"
-            title="Logout"
-            className="flex w-full items-center px-3 py-2 border-2 border-black text-sm font-bold hover:bg-muted"
+            className="flex w-full items-center px-3 py-2 border-2 border-black text-sm font-bold hover:bg-muted focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <LogOut className="w-4 h-4 mr-2" />
             Logout
@@ -98,7 +108,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* MAIN */}
-      <main className="flex-1 flex flex-col min-w-0">
+      <main id="main-content" className="flex-1 flex flex-col min-w-0">
 
         {/* TOPBAR */}
         <header className="h-14 md:h-16 flex items-center justify-between px-4 md:px-8 border-b-4 border-black bg-card">
@@ -106,12 +116,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           {/* Left */}
           <div className="flex items-center gap-3">
             <button
+              type="button"
               onClick={() => setOpen(!open)}
               aria-label="Toggle menu"
-              title="Toggle menu"
-              className="md:hidden"
+              aria-expanded={open}
+              aria-controls="sidebar"
+              className="md:hidden focus:outline-none focus:ring-2 focus:ring-primary"
             >
-              <Menu />
+              <Menu className="w-5 h-5" />
             </button>
 
             <div className="hidden sm:flex items-center px-2 py-1 bg-black text-primary text-xs font-mono">
@@ -141,7 +153,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span className="text-xs">?</span>
+                  <span aria-label="No profile image" className="text-xs">?</span>
                 )}
               </div>
             </div>
