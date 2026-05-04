@@ -74578,7 +74578,7 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"]
   })
 );
-app.options("*", (0, import_cors.default)());
+app.options("/*", (0, import_cors.default)());
 app.use(import_express14.default.json());
 app.use(import_express14.default.urlencoded({ extended: true }));
 app.use(
